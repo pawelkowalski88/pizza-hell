@@ -1,0 +1,133 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <h1>Checkout</h1>
+
+  <% if (error) { %>
+    <div class="alert alert-error"><strong>Error:</strong> <%= error %></div>
+  <% } %>
+
+  <div style="display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap">
+
+    <!-- Order summary -->
+    <div style="flex:1;min-width:240px">
+      <h2>Order Summary</h2>
+      <table>
+        <% for (var i = 0; i < cart.items.length; i++) {
+             var item = cart.items[i]; %>
+        <tr>
+          <td><%= item.pizzaName %> <small style="color:var(--muted)">(<%= item.size %>)</small></td>
+          <td style="white-space:nowrap">x<%= item.quantity %></td>
+          <td style="white-space:nowrap;text-align:right">$<%= item.itemTotal.toFixed(2) %></td>
+        </tr>
+        <% } %>
+        <% if (cart.happyHourDiscount > 0) { %>
+          <tr style="color:var(--orange)">
+            <td colspan="2">&#127775; Happy Hour</td>
+            <td style="text-align:right">-$<%= cart.happyHourDiscount.toFixed(2) %></td>
+          </tr>
+        <% } %>
+        <% if (cart.discount > 0) { %>
+          <tr style="color:var(--green)">
+            <td colspan="2">Promo (<%= cart.promoCode %>)</td>
+            <td style="text-align:right">-$<%= cart.discount.toFixed(2) %></td>
+          </tr>
+        <% } %>
+        <tr><td colspan="2">Tax</td><td style="text-align:right">$<%= cart.tax.toFixed(2) %></td></tr>
+        <tr><th colspan="2">Total</th><th style="text-align:right;color:var(--green)">$<%= cart.total.toFixed(2) %></th></tr>
+      </table>
+      <p style="margin-top:10px"><a href="/cart">&larr; Edit cart</a></p>
+    </div>
+
+    <!-- Checkout form -->
+    <div style="flex:2;min-width:300px">
+      <form action="/order/place" method="POST">
+
+        <h2>Delivery Address</h2>
+        <div class="form-group">
+          <label>Street Address *</label>
+          <input type="text" name="street" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" name="city" required>
+          </div>
+          <div class="form-group" style="max-width:90px">
+            <label>State *</label>
+            <input type="text" name="state" required maxlength="2" placeholder="NY">
+          </div>
+          <div class="form-group" style="max-width:110px">
+            <label>ZIP *</label>
+            <input type="text" name="zipCode" required pattern="[0-9]{5}" placeholder="10001">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Delivery Instructions</label>
+          <textarea name="instructions" rows="2" placeholder="Ring bell, leave at door…"></textarea>
+        </div>
+
+        <h2>Payment</h2>
+        <div class="payment-section">
+          <div class="radio-group">
+            <label>
+              <input type="radio" name="paymentMethod" value="card" checked onchange="togglePayment(this.value)">
+              &#128179; Credit / Debit Card
+            </label>
+            <label>
+              <input type="radio" name="paymentMethod" value="paypal" onchange="togglePayment(this.value)">
+              &#128196; PayPal
+            </label>
+          </div>
+
+          <div id="fields-card">
+            <div class="form-group">
+              <label>Card Number</label>
+              <input type="text" name="cardNumber" placeholder="4111 1111 1111 1111" maxlength="19">
+            </div>
+            <div class="form-group">
+              <label>Name on Card</label>
+              <input type="text" name="cardName" placeholder="Jane Smith">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry (MM/YY)</label>
+                <input type="text" name="cardExpiry" placeholder="12/26" maxlength="5">
+              </div>
+              <div class="form-group" style="max-width:90px">
+                <label>CVV</label>
+                <input type="text" name="cardCvv" placeholder="123" maxlength="4">
+              </div>
+            </div>
+            <p style="font-size:.8em;color:var(--muted)">
+              Test: <code>4111111111111111</code> succeeds &middot; ending <code>0000</code> declines
+            </p>
+          </div>
+
+          <div id="fields-paypal" style="display:none">
+            <div class="form-group">
+              <label>PayPal Email</label>
+              <input type="email" name="paypalEmail" placeholder="you@example.com">
+            </div>
+            <p style="font-size:.8em;color:var(--muted)">Test: <code>fail@example.com</code> will be declined</p>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-green" style="width:100%;margin-top:18px;padding:14px;font-size:1.05em">
+          &#9654; Place Order &mdash; $<%= cart.total.toFixed(2) %>
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function togglePayment(method) {
+  document.getElementById('fields-card').style.display   = method === 'card'   ? 'block' : 'none';
+  document.getElementById('fields-paypal').style.display = method === 'paypal' ? 'block' : 'none';
+}
+</script>
+
+<%- include('../partials/foot') %>

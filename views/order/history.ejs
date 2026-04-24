@@ -1,0 +1,41 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <h1>Order History</h1>
+
+  <% if (!orders || orders.length === 0) { %>
+    <div class="alert alert-info">No orders found for this session.</div>
+    <a href="/" class="btn btn-red" style="margin-top:12px">Order now!</a>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th><th>Date</th><th>Items</th><th>Total</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < orders.length; i++) {
+             var o = orders[i];
+             var summary = o.items.map(function(it) { return it.pizzaName; }).join(', ');
+             if (summary.length > 55) summary = summary.slice(0, 52) + '...';
+             var badgeClass = o.status === 'confirmed' ? 'badge-green'
+                            : o.status === 'cancelled'  ? 'badge-red' : 'badge-orange';
+        %>
+        <tr>
+          <td><strong><%= o.orderNumber %></strong></td>
+          <td style="white-space:nowrap">
+            <%= o.createdAt.toLocaleDateString() %>
+          </td>
+          <td><%= summary %></td>
+          <td style="white-space:nowrap">$<%= o.total.toFixed(2) %></td>
+          <td><span class="badge <%= badgeClass %>" style="text-transform:capitalize"><%= o.status %></span></td>
+          <td><a href="/order/confirmation/<%= o._id %>">View</a></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<%- include('../partials/foot') %>

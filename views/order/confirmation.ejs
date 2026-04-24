@@ -1,0 +1,75 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <div class="confirm-box">
+    <h1>&#10003; Order Confirmed!</h1>
+    <p style="font-size:1.1em;margin:8px 0">Your pizza is on its way.</p>
+    <p><strong>Order #<%= order.orderNumber %></strong></p>
+    <p>Estimated delivery: <strong><%= order.estimatedDeliveryMinutes %> minutes</strong></p>
+  </div>
+
+  <h2>What you ordered</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th style="text-align:right">Price</th></tr></thead>
+    <tbody>
+      <% for (var i = 0; i < order.items.length; i++) {
+           var item = order.items[i]; %>
+      <tr>
+        <td><%= item.pizzaName %></td>
+        <td style="text-transform:capitalize"><%= item.size %></td>
+        <td><%= item.quantity %></td>
+        <td style="text-align:right">$<%= item.itemTotal.toFixed(2) %></td>
+      </tr>
+      <% } %>
+      <% if (order.happyHourDiscount > 0) { %>
+        <tr style="color:var(--orange)">
+          <td colspan="3">&#127775; Happy Hour discount</td>
+          <td style="text-align:right">-$<%= order.happyHourDiscount.toFixed(2) %></td>
+        </tr>
+      <% } %>
+      <% if (order.discount > 0) { %>
+        <tr style="color:var(--green)">
+          <td colspan="3">Promo (<%= order.promoCode %>)</td>
+          <td style="text-align:right">-$<%= order.discount.toFixed(2) %></td>
+        </tr>
+      <% } %>
+      <tr><td colspan="3">Tax</td><td style="text-align:right">$<%= order.tax.toFixed(2) %></td></tr>
+      <tr>
+        <th colspan="3">Total charged</th>
+        <th style="text-align:right;color:var(--green)">$<%= order.total.toFixed(2) %></th>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:20px">
+    <div>
+      <h2>Delivering to</h2>
+      <p><%= order.deliveryAddress.street %></p>
+      <p><%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %> <%= order.deliveryAddress.zipCode %></p>
+      <% if (order.deliveryAddress.instructions) { %>
+        <p style="color:var(--muted);font-style:italic;font-size:.9em">
+          Instructions: <%= order.deliveryAddress.instructions %>
+        </p>
+      <% } %>
+    </div>
+    <div>
+      <h2>Payment</h2>
+      <% if (order.payment && order.payment.method === 'card') { %>
+        <p><%= order.payment.cardType || 'Card' %> ending in <%= order.payment.last4 %></p>
+      <% } else if (order.payment) { %>
+        <p>PayPal (<%= order.payment.paypalEmail %>)</p>
+      <% } %>
+      <% if (order.payment) { %>
+        <p style="font-size:.82em;color:var(--muted)">Ref: <%= order.payment.transactionId %></p>
+      <% } %>
+    </div>
+  </div>
+
+  <div style="margin-top:28px;display:flex;gap:14px">
+    <a href="/" class="btn btn-red">Order Again</a>
+    <a href="/order/history" class="btn btn-ghost">View Order History</a>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

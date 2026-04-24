@@ -1,0 +1,132 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <h1>&#127775; Happy Hours</h1>
+    <a href="/admin" class="btn btn-ghost">&#8592; Dashboard</a>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert alert-info"><%= message %></div>
+  <% } %>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <!-- Existing happy hours table -->
+  <% if (happyHours.length === 0) { %>
+    <p style="color:var(--muted);margin:16px 0">No happy hours configured yet.</p>
+  <% } else { %>
+    <table style="margin-top:16px">
+      <thead>
+        <tr>
+          <th>Name</th><th>Days</th><th>Time Window</th><th>Discount</th><th>Categories</th><th>Active</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; %>
+        <% for (var i = 0; i < happyHours.length; i++) {
+             var hh = happyHours[i];
+             var daysStr = hh.days.map(function(d){ return dayNames[d]; }).join(', ');
+             var timeStr = ('0'+hh.startHour).slice(-2)+':00 – '+('0'+hh.endHour).slice(-2)+':00';
+             var catsStr = hh.applicableCategories.includes('all') ? 'All' : hh.applicableCategories.join(', ');
+        %>
+        <tr>
+          <td><strong><%= hh.name %></strong></td>
+          <td style="white-space:nowrap"><%= daysStr %></td>
+          <td style="white-space:nowrap"><%= timeStr %></td>
+          <td><%= hh.discountPercent %>%</td>
+          <td><%= catsStr %></td>
+          <td>
+            <form action="/admin/happy-hours/<%= hh._id %>/toggle" method="POST" style="margin:0">
+              <button type="submit" class="btn btn-sm <%= hh.isActive ? 'btn-green' : 'btn-ghost' %>">
+                <%= hh.isActive ? 'Active' : 'Inactive' %>
+              </button>
+            </form>
+          </td>
+          <td>
+            <form action="/admin/happy-hours/<%= hh._id %>/delete" method="POST" style="margin:0"
+                  onsubmit="return confirm('Delete this happy hour?')">
+              <button type="submit" class="btn btn-sm btn-ghost" style="color:var(--red)">&#10005;</button>
+            </form>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <!-- Create form -->
+  <div style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px">
+    <h2>Create New Happy Hour</h2>
+    <form action="/admin/happy-hours" method="POST" style="max-width:560px">
+
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" name="name" required placeholder="Afternoon Happy Hour">
+      </div>
+
+      <div class="form-group">
+        <label>Days of Week *</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <% var allDays = [['0','Sun'],['1','Mon'],['2','Tue'],['3','Wed'],['4','Thu'],['5','Fri'],['6','Sat']]; %>
+          <% for (var d = 0; d < allDays.length; d++) { %>
+            <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+              <input type="checkbox" name="days" value="<%= allDays[d][0] %>"
+                     <%= (allDays[d][0] >= '1' && allDays[d][0] <= '5') ? 'checked' : '' %>>
+              <%= allDays[d][1] %>
+            </label>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Hour (0–23) *</label>
+          <input type="number" name="startHour" required min="0" max="23" value="14" style="width:80px">
+        </div>
+        <div class="form-group">
+          <label>End Hour (0–23) *</label>
+          <input type="number" name="endHour" required min="1" max="24" value="17" style="width:80px">
+        </div>
+        <div class="form-group">
+          <label>Discount % *</label>
+          <input type="number" name="discountPercent" required min="1" max="99" value="20" style="width:80px">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Applicable Categories</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+          <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+            <input type="checkbox" name="applicableCategories" value="all" checked> All
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+            <input type="checkbox" name="applicableCategories" value="classic"> Classic
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+            <input type="checkbox" name="applicableCategories" value="specialty"> Specialty
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+            <input type="checkbox" name="applicableCategories" value="vegetarian"> Vegetarian
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-weight:normal;cursor:pointer">
+            <input type="checkbox" name="applicableCategories" value="meat_lovers"> Meat Lovers
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer">
+          <input type="checkbox" name="isActive" value="1" checked>
+          Active immediately
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-green">&#43; Create Happy Hour</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

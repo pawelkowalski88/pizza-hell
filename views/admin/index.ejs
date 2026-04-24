@@ -1,0 +1,64 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <h1>Admin Dashboard</h1>
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <div class="stat-value"><%= stats.totalOrders %></div>
+      <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">$<%= stats.totalRevenue.toFixed(2) %></div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= stats.todayOrders %></div>
+      <div class="stat-label">Orders Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><%= stats.pendingOrders %></div>
+      <div class="stat-label">Pending Orders</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:28px;flex-wrap:wrap;margin-top:28px">
+    <div style="flex:1;min-width:280px">
+      <h2>Quick Links</h2>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        <a href="/admin/happy-hours" class="btn btn-ghost" style="text-align:left">&#127775; Manage Happy Hours</a>
+        <a href="/admin/promo-codes" class="btn btn-ghost" style="text-align:left">&#127381; Manage Promo Codes</a>
+      </div>
+    </div>
+
+    <div style="flex:2;min-width:320px">
+      <h2>Recent Orders</h2>
+      <% if (recentOrders.length === 0) { %>
+        <p style="color:var(--muted)">No orders yet.</p>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr><th>Order #</th><th>Date</th><th>Total</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <% for (var i = 0; i < recentOrders.length; i++) {
+                 var o = recentOrders[i];
+                 var badgeClass = o.status === 'confirmed' ? 'badge-green'
+                                : o.status === 'cancelled'  ? 'badge-red' : 'badge-orange';
+            %>
+            <tr>
+              <td><a href="/order/confirmation/<%= o._id %>"><strong><%= o.orderNumber %></strong></a></td>
+              <td style="white-space:nowrap"><%= o.createdAt.toLocaleDateString() %></td>
+              <td style="white-space:nowrap">$<%= o.total.toFixed(2) %></td>
+              <td><span class="badge <%= badgeClass %>" style="text-transform:capitalize"><%= o.status %></span></td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>

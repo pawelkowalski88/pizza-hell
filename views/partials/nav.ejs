@@ -1,0 +1,35 @@
+<nav class="nav">
+  <a class="nav-brand" href="/">&#127829; PizzaLand</a>
+  <div class="nav-spacer"></div>
+  <a href="/cart">&#128722; Cart</a>
+  <a href="/order/history">History</a>
+</nav>
+<% if (locals.happyHour) { %>
+<div class="hh-banner" id="hh-banner">
+  <span>&#127775; Happy Hour: <%= happyHour.discountPercent %>% off
+  <% if (happyHour.applicableCategories && !happyHour.applicableCategories.includes('all')) { %>
+    <%= happyHour.applicableCategories.join(', ') %>
+  <% } else { %>
+    all pizzas
+  <% } %>
+  </span>
+  <span>Ends in <span class="hh-countdown" id="hh-countdown">--:--:--</span></span>
+</div>
+<script>
+(function() {
+  var endHour = <%= happyHour.endHour %>;
+  function tick() {
+    var now = new Date();
+    var end = new Date();
+    end.setHours(endHour, 0, 0, 0);
+    var s = Math.max(0, Math.floor((end - now) / 1000));
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    var pad = function(n) { return String(n).padStart(2, '0'); };
+    document.getElementById('hh-countdown').textContent = pad(h) + ':' + pad(m) + ':' + pad(sec);
+    if (s > 0) setTimeout(tick, 1000);
+    else document.getElementById('hh-banner').style.display = 'none';
+  }
+  tick();
+})();
+</script>
+<% } %>

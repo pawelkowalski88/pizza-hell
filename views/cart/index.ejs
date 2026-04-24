@@ -1,0 +1,79 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <h1>&#128722; My Cart</h1>
+
+  <% if (promoError) { %>
+    <div class="alert alert-error"><%= promoError %></div>
+  <% } %>
+
+  <% if (!cart || cart.items.length === 0) { %>
+    <div class="alert alert-info">Your cart is empty.</div>
+    <a href="/" class="btn btn-red">Browse Menu</a>
+  <% } else { %>
+
+    <table>
+      <thead>
+        <tr><th>Pizza</th><th>Size</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < cart.items.length; i++) {
+             var item = cart.items[i]; %>
+        <tr>
+          <td><strong><%= item.pizzaName %></strong></td>
+          <td style="text-transform:capitalize"><%= item.size %></td>
+          <td><%= item.quantity %></td>
+          <td>$<%= item.unitPrice.toFixed(2) %></td>
+          <td>$<%= item.itemTotal.toFixed(2) %></td>
+          <td>
+            <form action="/cart/remove" method="POST" style="margin:0">
+              <input type="hidden" name="itemId" value="<%= item._id %>">
+              <button type="submit" class="btn btn-ghost btn-sm">&#10005;</button>
+            </form>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <table class="totals-table">
+        <tr><td>Subtotal</td><td style="text-align:right">$<%= cart.subtotal.toFixed(2) %></td></tr>
+        <% if (cart.happyHourDiscount > 0) { %>
+          <tr style="color:var(--orange)">
+            <td>&#127775; Happy Hour discount</td>
+            <td style="text-align:right">-$<%= cart.happyHourDiscount.toFixed(2) %></td>
+          </tr>
+        <% } %>
+        <% if (cart.discount > 0) { %>
+          <tr style="color:var(--green)">
+            <td>Promo (<%= cart.promoCode %>)</td>
+            <td style="text-align:right">-$<%= cart.discount.toFixed(2) %></td>
+          </tr>
+        <% } %>
+        <tr><td>Tax (8.5%)</td><td style="text-align:right">$<%= cart.tax.toFixed(2) %></td></tr>
+        <tr class="total-row"><th>Total</th><th style="text-align:right;color:var(--green)">$<%= cart.total.toFixed(2) %></th></tr>
+      </table>
+    </div>
+
+    <div style="margin-top:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <form action="/cart/promo" method="POST" style="display:flex;gap:8px">
+        <input type="text" name="promoCode" placeholder="Promo code"
+               value="<%= cart.promoCode || '' %>"
+               style="padding:7px 10px;border:1px solid var(--border);border-radius:4px;font-size:.93em;width:160px">
+        <button type="submit" class="btn btn-ghost">Apply</button>
+      </form>
+    </div>
+
+    <div style="margin-top:22px;display:flex;gap:14px;align-items:center">
+      <a href="/order/checkout" class="btn btn-green">
+        &#9654; Checkout &mdash; $<%= cart.total.toFixed(2) %>
+      </a>
+      <a href="/" style="color:var(--muted);font-size:.9em">Continue shopping</a>
+    </div>
+
+  <% } %>
+</div>
+
+<%- include('../partials/foot') %>

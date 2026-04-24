@@ -1,0 +1,101 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+
+<div class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <h1>&#127381; Promo Codes</h1>
+    <a href="/admin" class="btn btn-ghost">&#8592; Dashboard</a>
+  </div>
+
+  <% if (message) { %>
+    <div class="alert alert-info"><%= message %></div>
+  <% } %>
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <!-- Existing promo codes table -->
+  <% if (promoCodes.length === 0) { %>
+    <p style="color:var(--muted);margin:16px 0">No promo codes yet.</p>
+  <% } else { %>
+    <table style="margin-top:16px">
+      <thead>
+        <tr>
+          <th>Code</th><th>Discount</th><th>Expires</th><th>Usage</th><th>Active</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (var i = 0; i < promoCodes.length; i++) {
+             var pc = promoCodes[i];
+             var expired = pc.expiresAt && new Date(pc.expiresAt) < new Date();
+             var expiresStr = pc.expiresAt ? new Date(pc.expiresAt).toLocaleDateString() : 'Never';
+             var usageStr = pc.usageLimit > 0 ? pc.usageCount + ' / ' + pc.usageLimit : pc.usageCount + ' / ∞';
+        %>
+        <tr style="<%= expired ? 'opacity:0.55' : '' %>">
+          <td><strong style="font-family:monospace;font-size:1.05em"><%= pc.code %></strong></td>
+          <td><%= pc.discountPercent %>%</td>
+          <td style="white-space:nowrap<%= expired ? ';color:var(--red)' : '' %>">
+            <%= expiresStr %><%= expired ? ' (expired)' : '' %>
+          </td>
+          <td><%= usageStr %></td>
+          <td>
+            <form action="/admin/promo-codes/<%= pc._id %>/toggle" method="POST" style="margin:0">
+              <button type="submit" class="btn btn-sm <%= pc.isActive && !expired ? 'btn-green' : 'btn-ghost' %>">
+                <%= pc.isActive && !expired ? 'Active' : 'Inactive' %>
+              </button>
+            </form>
+          </td>
+          <td>
+            <form action="/admin/promo-codes/<%= pc._id %>/delete" method="POST" style="margin:0"
+                  onsubmit="return confirm('Delete promo code <%= pc.code %>?')">
+              <button type="submit" class="btn btn-sm btn-ghost" style="color:var(--red)">&#10005;</button>
+            </form>
+          </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <!-- Create form -->
+  <div style="margin-top:32px;border-top:1px solid var(--border);padding-top:24px">
+    <h2>Create New Promo Code</h2>
+    <form action="/admin/promo-codes" method="POST" style="max-width:480px">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Code * <small style="color:var(--muted)">(auto-uppercased)</small></label>
+          <input type="text" name="code" required placeholder="SAVE20"
+                 style="font-family:monospace;text-transform:uppercase"
+                 oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group" style="max-width:100px">
+          <label>Discount % *</label>
+          <input type="number" name="discountPercent" required min="1" max="99" value="10">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expires On <small style="color:var(--muted)">(leave blank = never)</small></label>
+          <input type="date" name="expiresAt">
+        </div>
+        <div class="form-group" style="max-width:140px">
+          <label>Usage Limit <small style="color:var(--muted)">(0 = unlimited)</small></label>
+          <input type="number" name="usageLimit" min="0" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;font-weight:normal;cursor:pointer">
+          <input type="checkbox" name="isActive" value="1" checked>
+          Active immediately
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-green">&#43; Create Promo Code</button>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/foot') %>
